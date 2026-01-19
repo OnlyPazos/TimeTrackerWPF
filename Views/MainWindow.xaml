@@ -1,0 +1,148 @@
+﻿<Window x:Class="TimeTracker.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="clr-namespace:TimeTracker.Converters"
+        xmlns:helpers="clr-namespace:TimeTracker.Helpers"
+        xmlns:vm="clr-namespace:TimeTracker.ViewModels"
+        mc:Ignorable="d"
+        Title="TimeTracker" Height="450" Width="800"
+        Background="#555">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        <converters:IntervalToCanvasLeftConverter x:Key="IntervalToCanvasLeftConverter"/>
+        <converters:IntervalToCanvasWidthConverter x:Key="IntervalToCanvasWidthConverter"/>
+    </Window.Resources>
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
+            <RowDefinition Height="12" />
+            <RowDefinition Height="48" />
+            <RowDefinition Height="12" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="#AAA" CornerRadius="10">
+            <Canvas Name="TimelineCanvas" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5" />
+        </Border>
+
+        <Border Grid.Row="2" Background="#AAA" CornerRadius="10">
+            <Grid Name="DistributionBar" Margin="5"></Grid>
+        </Border>
+
+        <Border Grid.Row="4" Background="#AAA" CornerRadius="20" Padding="12">
+            <ItemsControl ItemsSource="{Binding Tasks}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="5" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:TaskViewModel}">
+                        <Grid Margin="6">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="8" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Button Grid.Row="0"
+                                    Background="{Binding Color}"
+                                    Command="{Binding SelectCommand}"
+                                    BorderThickness="0"
+                                    helpers:ButtonHelper.CornerRadius="8"
+                                    >
+                                <Grid Margin="0,12">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Text="{Binding Name}"
+                                               FontFamily="Bahnschrift"
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               IsHitTestVisible="False"
+                                               Opacity="0.85"
+                                               />
+
+                                    <TextBlock Grid.Row="2" Text="{Binding Total, StringFormat=hh\\:mm\\:ss}"
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               IsHitTestVisible="False"
+                                               Opacity="0.85"/>
+
+                                    <TextBlock Grid.Row="4" Text="{Binding Progress, StringFormat={}{0:P1}}"
+                                               FontSize="14"
+                                               FontWeight="Bold"
+                                               Foreground="White"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               IsHitTestVisible="False"
+                                               Opacity="0.85"/>
+                                </Grid>
+                            </Button>
+
+                            <Grid Grid.Row="2"
+                                  HorizontalAlignment="Center"
+                                  Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibility}}">
+                                <Grid.RenderTransform>
+                                    <ScaleTransform x:Name="RunningScale" ScaleY="0" />
+                                </Grid.RenderTransform>
+                                <Grid.RenderTransformOrigin>0.5,0</Grid.RenderTransformOrigin>
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Ellipse Grid.Column="0" Width="12" Height="12" Fill="Green" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="Active" FontWeight="Bold" />
+
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                <DataTrigger.EnterActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                                                             To="1"
+                                                             Duration="0:0:0.2"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.EnterActions>
+                                                <DataTrigger.ExitActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                                                             To="0"
+                                                             Duration="0:0:0.2"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.ExitActions>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                            </Grid>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
+    </Grid>
+</Window>

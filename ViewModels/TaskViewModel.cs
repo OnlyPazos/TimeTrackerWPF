@@ -1,0 +1,173 @@
+﻿using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Windows.Input;
+using System.Windows.Media;
+using TimeTracker.Commands;
+using TimeTracker.Models;
+using TimeTracker.Providers;
+
+namespace TimeTracker.ViewModels
+{
+    public class TaskViewModel : BaseViewModel
+    {
+        private readonly TaskModel _model;
+        private readonly Stopwatch _stopwatch = new Stopwatch();
+        private bool _isRunning;
+        private readonly ITotalTimeProvider _totalTimeProvider;
+
+        public ObservableCollection<TimeInterval> Intervals { get; } = new ObservableCollection<TimeInterval>();
+
+        public Guid Id { get => _model.Id; }
+
+        public string Name
+        {
+            get => _model.Name;
+            set { if (_model.Name != value) _model.Name = value; OnPropertyChanged(); }
+        }
+
+        public TimeSpan Total => Intervals.Aggregate(TimeSpan.Zero, (sum, i) => sum + i.Duration);
+
+        public double Progress
+        {
+            get
+            {
+                if (_totalTimeProvider == null) return 0;
+
+                var total = _totalTimeProvider.TotalTime;
+                if (total.TotalMilliseconds <= 0) return 0;
+
+                return Total.TotalMilliseconds / total.TotalMilliseconds;
+            }
+        }
+
+        public bool IsRunning
+        {
+            get => _isRunning;
+            set { if (_isRunning != value) _isRunning = value; OnPropertyChanged(); ((RelayCommand)StartCommand).RaiseCanExecuteChanged(); ((RelayCommand)StopCommand).RaiseCanExecuteChanged(); }
+        }
+
+        public Brush Color => new SolidColorBrush((Color)ColorConverter.ConvertFromString(_model.ColorHex));
+
+        public ICommand StartCommand { get; }
+        public ICommand StopCommand { get; }
+        public ICommand SelectCommand { get; }
+
+        public TaskViewModel(TaskModel model, ITotalTimeProvider totalTimeProvider, Action<TaskViewModel> onSelect)
+        {
+            _model = model ?? throw new ArgumentNullException(nameof(model));
+            _totalTimeProvider = totalTimeProvider;
+
+            foreach (var interval in model.Intervals)
+                Intervals.Add(interval);
+
+            RefreshTotal();
+
+            SelectCommand = new RelayCommand(() => onSelect(this));
+            StartCommand = new RelayCommand(Start, () => !IsRunning);
+            StopCommand = new RelayCommand(Stop, () => IsRunning);
+        }
+
+        public void Start()
+        {
+            if (IsRunning) return;
+
+            var interval = new TimeInterval
+            {
+                TaskId = Id,
+                Start = DateTimeOffset.Now,
+                Duration = TimeSpan.Zero,
+                IsFinalized = false
+            };
+
+            Intervals.Add(interval);
+
+            if (_totalTimeProvider is MainViewModel mainVm)
+            {
+                mainVm.AllIntervals.Add(new IntervalViewModel
+                {
+                    Interval = interval,
+                    Color = Color
+                });
+            }
+
+            _stopwatch.Restart();
+            IsRunning = true;
+        }
+
+        public void Stop()
+        {
+            if (!IsRunning) return;
+
+            _stopwatch.Stop();
+
+            var interval = Intervals.Last();
+            interval.Duration = DateTimeOffset.Now - interval.Start;
+            interval.IsFinalized = true;
+
+            _stopwatch.Reset();
+            IsRunning = false;
+
+            RefreshTotal();
+        }
+
+        public void ResumeFromInterval(TimeInterval interval)
+        {
+            if (interval.IsFinalized) return;
+
+            _stopwatch.Restart();
+
+            IsRunning = true;
+        }
+
+
+        public void RefreshTotal()
+        {
+            OnPropertyChanged(nameof(Total));
+            OnPropertyChanged(nameof(Progress));
+        }
+
+        public void RefreshIntervals()
+        {
+            if (!IsRunning) return;
+
+            var interval = Intervals.Last();
+            interval.Duration = (interval.IsFinalized ? interval.Duration : DateTimeOffset.Now - interval.Start);
+
+            //Console.WriteLine(string.Join(", ", Intervals.Select(i => $"[{i.Start:HH:mm:ss} - {i.Duration}]")));
+        }
+
+        public TaskModel ToModel()
+        {
+            return new TaskModel
+            {
+                Id = Id,
+                Name = Name,
+                ColorHex = _model.ColorHex,
+                Intervals = Intervals.ToList()
+            };
+        }
+    }
+    public class TimeInterval : INotifyPropertyChanged
+    {
+        private TimeSpan _duration;
+
+        public Guid TaskId { get; set; }
+        public DateTimeOffset Start { get; set; }
+        public TimeSpan Duration { get => _duration; set { if (_duration != value) _duration = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Duration))); } }
+        public bool IsFinalized { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+    }
+
+    public class TimelineBlock
+    {
+        public DateTimeOffset Start { get; set; }
+        public TimeSpan Duration { get; set; }
+        public Brush Color { get; set; }
+        public bool IsIdle { get; set; }
+        public string Label { get; set; }
+    }
+}
