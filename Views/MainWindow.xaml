@@ -55,25 +55,27 @@
                                     BorderThickness="0"
                                     helpers:ButtonHelper.CornerRadius="8"
                                     >
-                                <Grid Margin="0,12">
+                                <Grid Margin="12,12">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="1.25*" />
+                                        <RowDefinition Height="1*" />
                                         <RowDefinition Height="*" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="0.25*" />
                                     </Grid.RowDefinitions>
 
                                     <TextBlock Grid.Row="0" Text="{Binding Name}"
-                                               FontFamily="Bahnschrift"
-                                               FontSize="20"
-                                               FontWeight="Bold"
-                                               Foreground="White"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               IsHitTestVisible="False"
-                                               Opacity="0.85"
-                                               />
+                                                TextOptions.TextRenderingMode="ClearType"
+                                                FontFamily="Bahnschrift"
+                                                FontSize="18"
+                                                FontWeight="Bold"
+                                                Foreground="White"
+                                                HorizontalAlignment="Center"
+                                                IsHitTestVisible="False"
+                                                Opacity="0.85"
+                                                TextAlignment="Center"
+                                                TextTrimming="CharacterEllipsis"
+                                                TextWrapping="Wrap"
+                                                />
 
                                     <TextBlock Grid.Row="2" Text="{Binding Total, StringFormat=hh\\:mm\\:ss}"
                                                FontSize="20"
