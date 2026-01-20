@@ -152,7 +152,7 @@ namespace TimeTracker.Views
 
             foreach (var item in _taskColumns)
             {
-                item.Value.Width = new GridLength(item.Key.Progress, GridUnitType.Star);
+                item.Value.Width = new GridLength(item.Key.DailyProgress, GridUnitType.Star);
             }
         }
 
@@ -220,7 +220,7 @@ namespace TimeTracker.Views
             bool first = true;
             foreach (var task in vm.Tasks)
             {
-                if (task.Total.TotalMilliseconds <= 0)
+                if (task.DailyTotal.TotalMilliseconds <= 0)
                     continue;
 
                 if (!first)
@@ -238,7 +238,7 @@ namespace TimeTracker.Views
 
                 var col = new ColumnDefinition
                 {
-                    Width = new GridLength(task.Progress, GridUnitType.Star)
+                    Width = new GridLength(task.DailyProgress, GridUnitType.Star)
                 };
 
                 DistributionBar.ColumnDefinitions.Add(col);

@@ -28,7 +28,46 @@ namespace TimeTracker.ViewModels
             set { if (_model.Name != value) _model.Name = value; OnPropertyChanged(); }
         }
 
+        public TimeSpan DailyTotal
+        {
+            get
+            {
+                var dayStart = DateTime.Today;
+                var dayEnd = dayStart.AddDays(1);
+
+                return Intervals.Aggregate(TimeSpan.Zero, (sum, interval) =>
+                {
+                    var intervalStart = interval.Start < dayStart
+                        ? dayStart
+                        : interval.Start;
+
+                    var intervalEnd = interval.Start + interval.Duration;
+                    if (intervalEnd > dayEnd)
+                        intervalEnd = dayEnd;
+
+                    if (intervalEnd <= intervalStart)
+                        return sum;
+
+                    return sum + (intervalEnd - intervalStart);
+                });
+            }
+        }
         public TimeSpan Total => Intervals.Aggregate(TimeSpan.Zero, (sum, i) => sum + i.Duration);
+
+        public double DailyProgress
+        {
+            get
+            {
+                if (!(_totalTimeProvider is MainViewModel mainVm))
+                    return 0;
+
+                var dayTotal = mainVm.DailyTotal;
+                if (dayTotal.TotalMilliseconds <= 0)
+                    return 0;
+
+                return DailyTotal.TotalMilliseconds / dayTotal.TotalMilliseconds;
+            }
+        }
 
         public double Progress
         {
@@ -138,6 +177,9 @@ namespace TimeTracker.ViewModels
 
         public void RefreshTotal()
         {
+            OnPropertyChanged(nameof(DailyTotal));
+            OnPropertyChanged(nameof(DailyProgress));
+
             OnPropertyChanged(nameof(Total));
             OnPropertyChanged(nameof(Progress));
         }

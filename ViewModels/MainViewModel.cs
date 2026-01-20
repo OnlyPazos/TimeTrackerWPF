@@ -28,6 +28,7 @@ namespace TimeTracker.ViewModels
         public ObservableCollection<IntervalViewModel> AllIntervals { get; } = new ObservableCollection<IntervalViewModel>();
 
         public ObservableCollection<TaskViewModel> Tasks { get; }
+        public TimeSpan DailyTotal => Tasks.Aggregate(TimeSpan.Zero, (sum, t) => sum + t.DailyTotal);
         public TimeSpan TotalTime => Tasks.Aggregate(TimeSpan.Zero, (acc, t) => acc + t.Total);
 
         private TaskViewModel _selectedTask;
