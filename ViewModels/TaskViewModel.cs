@@ -113,15 +113,28 @@ namespace TimeTracker.ViewModels
             RefreshTotal();
         }
 
-        public void ResumeFromInterval(TimeInterval interval)
+        public bool ResumeFromInterval(TimeInterval interval)
         {
-            if (interval.IsFinalized) return;
+            if (interval.IsFinalized) return false;
 
-            _stopwatch.Restart();
+            var startDay = interval.Start.Date;
+            var today = DateTimeOffset.Now.Date;
 
-            IsRunning = true;
+            // Caso 1: mismo día → Simplemente reanudar
+            if (startDay == today)
+            {
+                _stopwatch.Restart();
+                IsRunning = true;
+                return true;
+            }
+
+            // Caso 2: cruzó uno o más días → Cerramos intervalo anterior a las 23:59:59
+            var endOfStartDay = startDay.AddDays(1).AddTicks(-1);
+            interval.Duration = endOfStartDay - interval.Start;
+            interval.IsFinalized = true;
+
+            return false;
         }
-
 
         public void RefreshTotal()
         {

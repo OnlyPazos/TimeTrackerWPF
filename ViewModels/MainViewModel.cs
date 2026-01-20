@@ -201,6 +201,10 @@ namespace TimeTracker.ViewModels
 
             var intervals = AllIntervals
                 .Select(i => i.Interval)
+                .Where(i =>
+                    i.Start < end &&
+                    i.Start + i.Duration > start
+                )
                 .OrderBy(i => i.Start)
                 .ToList();
 

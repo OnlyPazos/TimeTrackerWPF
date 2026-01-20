@@ -31,9 +31,6 @@ namespace TimeTracker.Views
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs _e)
         {
-            BuildTimeline();
-            BuildTaskBar();
-
             foreach (var task in vm.Tasks)
             {
                 task.PropertyChanged += Task_PropertyChanged;
@@ -43,8 +40,8 @@ namespace TimeTracker.Views
                 {
                     var elapsed = DateTime.Now - last.Start;
 
-                    task.ResumeFromInterval(last);
-                    vm.SelectedTask = task;
+                    bool wasResumed = task.ResumeFromInterval(last);
+                    vm.SelectedTask = wasResumed ? task : null;
                     break;
                 }
             }
@@ -90,6 +87,9 @@ namespace TimeTracker.Views
                 UpdateTimeline();
                 UpdateTaskBar();
             };
+
+            BuildTimeline();
+            BuildTaskBar();
         }
 
         private void Task_PropertyChanged(object sender, PropertyChangedEventArgs e)
