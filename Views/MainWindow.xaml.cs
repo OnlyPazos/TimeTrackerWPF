@@ -4,9 +4,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using TimeTracker.ViewModels;
 
 namespace TimeTracker.Views
@@ -18,6 +17,7 @@ namespace TimeTracker.Views
         private readonly List<Border> _timelineBlocks = new List<Border>();
         private TimelineBlock _lastBlock;
         private bool _timelineDirty = true;
+        private bool _taskBarWasEmpty;
 
         private readonly Dictionary<TaskViewModel, ColumnDefinition> _taskColumns = new Dictionary<TaskViewModel, ColumnDefinition>();
         private bool _taskBarDirty = true;
@@ -211,6 +211,8 @@ namespace TimeTracker.Views
         {
             if (vm == null) return;
 
+            _taskBarWasEmpty = DistributionBar.Children.Count == 0;
+
             DistributionBar.Children.Clear();
             DistributionBar.ColumnDefinitions.Clear();
             _taskColumns.Clear();
@@ -248,13 +250,41 @@ namespace TimeTracker.Views
                 {
                     Background = task.Color,
                     Margin = new Thickness(1),
-                    CornerRadius = new CornerRadius(5)
+                    CornerRadius = new CornerRadius(5),
+                    RenderTransformOrigin = new Point(0, 0.5),
+                    RenderTransform = new ScaleTransform(0, 1)
                 };
 
                 DistributionBar.Children.Add(border);
                 Grid.SetColumn(border, colIndex++);
-            }
 
+                if (_taskBarWasEmpty)
+                {
+                    AnimateScaleIn(border);
+                }
+                else
+                {
+                    ((ScaleTransform)border.RenderTransform).ScaleX = 1;
+                }
+            }
         }
+
+        private void AnimateScaleIn(UIElement element)
+        {
+            var animation = new DoubleAnimation
+            {
+                From = 0,
+                To = 1,
+                Duration = TimeSpan.FromMilliseconds(300),
+                EasingFunction = new CubicEase
+                {
+                    EasingMode = EasingMode.EaseOut
+                }
+            };
+
+            var transform = (ScaleTransform)element.RenderTransform;
+            transform.BeginAnimation(ScaleTransform.ScaleXProperty, animation);
+        }
+
     }
 }
