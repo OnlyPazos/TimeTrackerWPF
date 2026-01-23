@@ -36,9 +36,16 @@
             <ItemsControl ItemsSource="{Binding Tasks}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <UniformGrid Columns="5" />
+                        <UniformGrid Columns="{Binding GridColumns}" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="MinWidth" Value="150"/>
+                        <Setter Property="MinHeight" Value="200"/>
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type vm:TaskViewModel}">
@@ -77,7 +84,7 @@
                                                 TextWrapping="Wrap"
                                                 />
 
-                                    <TextBlock Grid.Row="2" Text="{Binding Total, StringFormat=hh\\:mm\\:ss}"
+                                    <TextBlock Grid.Row="2" Text="{Binding DailyTotal, StringFormat=hh\\:mm\\:ss}"
                                                FontSize="20"
                                                FontWeight="Bold"
                                                Foreground="White"
@@ -86,7 +93,7 @@
                                                IsHitTestVisible="False"
                                                Opacity="0.85"/>
 
-                                    <TextBlock Grid.Row="4" Text="{Binding Progress, StringFormat={}{0:P1}}"
+                                    <TextBlock Grid.Row="4" Text="{Binding DailyProgress, StringFormat={}{0:P1}}"
                                                FontSize="14"
                                                FontWeight="Bold"
                                                Foreground="White"

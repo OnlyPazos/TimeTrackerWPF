@@ -21,6 +21,10 @@ namespace TimeTracker.ViewModels
         private Dictionary<Guid, TaskViewModel> _taskById;
         public event Action TimelineStructureChanged;
 
+        private const int MaxColumns = 5;
+        public int GridColumns => Tasks.Count >= MaxColumns ? MaxColumns : Math.Max(1, Tasks.Count);
+
+
         Brush IdleBrush = new SolidColorBrush(Color.FromRgb(200, 200, 200));
         public TimeSpan TimelineTotal { get; } = TimeSpan.FromHours(18);
         public DateTime TimelineStart { get; } = DateTime.Today.AddHours(6);
@@ -83,6 +87,8 @@ namespace TimeTracker.ViewModels
                     foreach (TaskViewModel t in e.OldItems)
                         _taskById.Remove(t.Id);
                 }
+
+                OnPropertyChanged(nameof(GridColumns));
             };
 
             AllIntervals.CollectionChanged += (_, __) =>
