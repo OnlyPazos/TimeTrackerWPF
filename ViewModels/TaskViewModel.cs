@@ -88,7 +88,8 @@ namespace TimeTracker.ViewModels
             set { if (_isRunning != value) _isRunning = value; OnPropertyChanged(); ((RelayCommand)StartCommand).RaiseCanExecuteChanged(); ((RelayCommand)StopCommand).RaiseCanExecuteChanged(); }
         }
 
-        public Brush Color => new SolidColorBrush((Color)ColorConverter.ConvertFromString(_model.ColorHex));
+        public string ColorHex { get => _model.ColorHex; set { if (_model.ColorHex != value) { _model.ColorHex = value; OnPropertyChanged(nameof(ColorHex)); OnPropertyChanged(nameof(Color)); }}}
+        public Brush Color { get { try { return (Brush)new BrushConverter().ConvertFromString(_model.ColorHex) ?? Brushes.Gray; } catch { return Brushes.Gray; }}}
 
         public ICommand StartCommand { get; }
         public ICommand StopCommand { get; }

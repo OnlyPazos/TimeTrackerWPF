@@ -21,8 +21,35 @@ namespace TimeTracker.ViewModels
         private Dictionary<Guid, TaskViewModel> _taskById;
         public event Action TimelineStructureChanged;
 
-        private const int MaxColumns = 5;
+
+
+        private int _maxColumns = 5;
+        public int MaxColumns
+        {
+            get => _maxColumns;
+            set
+            {
+                if (_maxColumns != value)
+                {
+                    _maxColumns = value;
+                    OnPropertyChanged(nameof(MaxColumns));
+                    OnPropertyChanged(nameof(GridColumns));
+                }
+            }
+        }
         public int GridColumns => Tasks.Count >= MaxColumns ? MaxColumns : Math.Max(1, Tasks.Count);
+
+
+
+        private bool _isConfigVisible;
+        public bool IsConfigVisible
+        {
+            get => _isConfigVisible;
+            set { _isConfigVisible = value; OnPropertyChanged(); }
+        }
+
+        public ICommand ToggleConfigCommand => new RelayCommand(() => IsConfigVisible = !IsConfigVisible);
+
 
 
         Brush IdleBrush = new SolidColorBrush(Color.FromRgb(200, 200, 200));

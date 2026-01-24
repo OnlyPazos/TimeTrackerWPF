@@ -6,6 +6,8 @@
         xmlns:converters="clr-namespace:TimeTracker.Converters"
         xmlns:helpers="clr-namespace:TimeTracker.Helpers"
         xmlns:vm="clr-namespace:TimeTracker.ViewModels"
+        xmlns:local="clr-namespace:TimeTracker.Views"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
         Title="TimeTracker" Height="450" Width="800"
         Background="#555">
@@ -15,8 +17,15 @@
         <converters:IntervalToCanvasWidthConverter x:Key="IntervalToCanvasWidthConverter"/>
     </Window.Resources>
 
-    <Grid Margin="12">
+    <Grid ClipToBounds="False" Margin="12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        
         <Grid.RowDefinitions>
+            <RowDefinition Height="24" />
+            <RowDefinition Height="12" />
             <RowDefinition Height="48" />
             <RowDefinition Height="12" />
             <RowDefinition Height="48" />
@@ -24,134 +33,139 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="#AAA" CornerRadius="10">
+        <Border Grid.Row="0" Grid.ColumnSpan="2" CornerRadius="10" HorizontalAlignment="Right">
+            <Button Style="{StaticResource ButtonNoShadow}" Command="{Binding ToggleConfigCommand}">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <iconPacks:FeatherIcons Kind="Settings" Width="16" Height="16"/>
+                    <TextBlock Margin="6,0,0,0" Text="Configuración" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </Border>
+
+        <Border Grid.Row="2" Background="#AAA" CornerRadius="10" Style="{StaticResource ShadowedGridBorder}">
             <Canvas Name="TimelineCanvas" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5" />
         </Border>
 
-        <Border Grid.Row="2" Background="#AAA" CornerRadius="10">
+        <Border Grid.Row="4" Background="#AAA" CornerRadius="10" Style="{StaticResource ShadowedGridBorder}">
             <Grid Name="DistributionBar" Margin="5"></Grid>
         </Border>
 
-        <Border Grid.Row="4" Background="#AAA" CornerRadius="20" Padding="12">
-            <ItemsControl ItemsSource="{Binding Tasks}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Columns="{Binding GridColumns}" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
+        <Border ClipToBounds="False" Grid.Row="6" Background="#AAA" CornerRadius="20" Padding="12" Style="{StaticResource ShadowedGridBorder}">
+            <ScrollViewer ClipToBounds="False" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Tasks}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="{Binding GridColumns}" ClipToBounds="False" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
 
-                <ItemsControl.ItemContainerStyle>
-                    <Style TargetType="ContentPresenter">
-                        <Setter Property="MinWidth" Value="150"/>
-                        <Setter Property="MinHeight" Value="200"/>
-                    </Style>
-                </ItemsControl.ItemContainerStyle>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:TaskViewModel}">
+                            <Grid ClipToBounds="False" Margin="6">                                
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="8" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
 
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type vm:TaskViewModel}">
-                        <Grid Margin="6">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*" />
-                                <RowDefinition Height="8" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+                                <Button Grid.Row="0"
+                                        Background="{Binding Color}"
+                                        Command="{Binding SelectCommand}"
+                                        BorderThickness="0"
+                                        helpers:ButtonHelper.CornerRadius="8"
+                                        Style="{StaticResource TaskButtonStyle}">
+                                    <Grid Margin="12,12">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="1.25*" />
+                                            <RowDefinition Height="1*" />
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="0.25*" />
+                                        </Grid.RowDefinitions>
 
-                            <Button Grid.Row="0"
-                                    Background="{Binding Color}"
-                                    Command="{Binding SelectCommand}"
-                                    BorderThickness="0"
-                                    helpers:ButtonHelper.CornerRadius="8"
-                                    >
-                                <Grid Margin="12,12">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="1.25*" />
-                                        <RowDefinition Height="1*" />
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="0.25*" />
-                                    </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Text="{Binding Name}"
+                                                    TextOptions.TextRenderingMode="ClearType"
+                                                    FontSize="18"
+                                                    FontWeight="Bold"
+                                                    HorizontalAlignment="Center"
+                                                    IsHitTestVisible="False"
+                                                    Opacity="0.85"
+                                                    TextAlignment="Center"
+                                                    TextTrimming="CharacterEllipsis"
+                                                    TextWrapping="Wrap"
+                                                    />
 
-                                    <TextBlock Grid.Row="0" Text="{Binding Name}"
-                                                TextOptions.TextRenderingMode="ClearType"
-                                                FontFamily="Bahnschrift"
-                                                FontSize="18"
-                                                FontWeight="Bold"
-                                                Foreground="White"
-                                                HorizontalAlignment="Center"
-                                                IsHitTestVisible="False"
-                                                Opacity="0.85"
-                                                TextAlignment="Center"
-                                                TextTrimming="CharacterEllipsis"
-                                                TextWrapping="Wrap"
-                                                />
+                                        <TextBlock Grid.Row="2" Text="{Binding DailyTotal, StringFormat=hh\\:mm\\:ss}"
+                                                   FontSize="20"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   IsHitTestVisible="False"
+                                                   Opacity="0.85"/>
 
-                                    <TextBlock Grid.Row="2" Text="{Binding DailyTotal, StringFormat=hh\\:mm\\:ss}"
-                                               FontSize="20"
-                                               FontWeight="Bold"
-                                               Foreground="White"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               IsHitTestVisible="False"
-                                               Opacity="0.85"/>
+                                        <TextBlock Grid.Row="4" Text="{Binding DailyProgress, StringFormat={}{0:P1}}"
+                                                   FontSize="14"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   IsHitTestVisible="False"
+                                                   Opacity="0.85"/>
+                                    </Grid>
+                                </Button>
 
-                                    <TextBlock Grid.Row="4" Text="{Binding DailyProgress, StringFormat={}{0:P1}}"
-                                               FontSize="14"
-                                               FontWeight="Bold"
-                                               Foreground="White"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               IsHitTestVisible="False"
-                                               Opacity="0.85"/>
+                                <Grid Grid.Row="2"
+                                      HorizontalAlignment="Center"
+                                      Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibility}}">
+                                    <Grid.RenderTransform>
+                                        <ScaleTransform x:Name="RunningScale" ScaleY="0" />
+                                    </Grid.RenderTransform>
+                                    <Grid.RenderTransformOrigin>0.5,0</Grid.RenderTransformOrigin>
+
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Ellipse Grid.Column="0" Width="12" Height="12" Fill="Green" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Text="Active" FontWeight="Bold" />
+
+                                    <Grid.Style>
+                                        <Style TargetType="Grid">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                    <DataTrigger.EnterActions>
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                                                                                 To="1"
+                                                                                 Duration="0:0:0.2"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </DataTrigger.EnterActions>
+                                                    <DataTrigger.ExitActions>
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                                                                                 To="0"
+                                                                                 Duration="0:0:0.2"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </DataTrigger.ExitActions>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Grid.Style>
                                 </Grid>
-                            </Button>
-
-                            <Grid Grid.Row="2"
-                                  HorizontalAlignment="Center"
-                                  Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibility}}">
-                                <Grid.RenderTransform>
-                                    <ScaleTransform x:Name="RunningScale" ScaleY="0" />
-                                </Grid.RenderTransform>
-                                <Grid.RenderTransformOrigin>0.5,0</Grid.RenderTransformOrigin>
-
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="10" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <Ellipse Grid.Column="0" Width="12" Height="12" Fill="Green" VerticalAlignment="Center"/>
-                                <TextBlock Grid.Column="2" Text="Active" FontWeight="Bold" />
-
-                                <Grid.Style>
-                                    <Style TargetType="Grid">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                                <DataTrigger.EnterActions>
-                                                    <BeginStoryboard>
-                                                        <Storyboard>
-                                                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
-                                                             To="1"
-                                                             Duration="0:0:0.2"/>
-                                                        </Storyboard>
-                                                    </BeginStoryboard>
-                                                </DataTrigger.EnterActions>
-                                                <DataTrigger.ExitActions>
-                                                    <BeginStoryboard>
-                                                        <Storyboard>
-                                                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
-                                                             To="0"
-                                                             Duration="0:0:0.2"/>
-                                                        </Storyboard>
-                                                    </BeginStoryboard>
-                                                </DataTrigger.ExitActions>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Grid.Style>
                             </Grid>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
         </Border>
+
+        <local:ConfigView Margin="12,12,0,0" Grid.Column="2" Grid.Row="1" Grid.RowSpan="7" x:Name="ConfigPanel"
+                          Visibility="{Binding DataContext.IsConfigVisible, 
+                                       RelativeSource={RelativeSource AncestorType=Window}, 
+                                       Converter={StaticResource BoolToVisibility}}" />
     </Grid>
 </Window>

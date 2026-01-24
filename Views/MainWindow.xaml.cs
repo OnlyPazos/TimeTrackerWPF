@@ -31,6 +31,8 @@ namespace TimeTracker.Views
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs _e)
         {
+            ConfigPanel.SetViewModel(vm);
+
             foreach (var task in vm.Tasks)
             {
                 task.PropertyChanged += Task_PropertyChanged;
@@ -174,7 +176,6 @@ namespace TimeTracker.Views
             Canvas.SetTop(border, 0);
         }
 
-
         private void BuildTimeline()
         {
             if (vm == null || TimelineCanvas.ActualWidth <= 0)
@@ -196,8 +197,13 @@ namespace TimeTracker.Views
                     Background = block.Color,
                     CornerRadius = new CornerRadius(5),
                     Opacity = block.IsIdle ? 0.3 : 1,
-                    ToolTip = block.Label
+                    ToolTip = new TextBlock()
+                    {
+                        Text = block.Label,
+                        Foreground = Brushes.Black
+                    }
                 };
+                border.Style = (Style)Application.Current.Resources["ShadowBorder"];
 
                 TimelineCanvas.Children.Add(border);
                 _timelineBlocks.Add(border);
@@ -254,6 +260,8 @@ namespace TimeTracker.Views
                     RenderTransformOrigin = new Point(0, 0.5),
                     RenderTransform = new ScaleTransform(0, 1)
                 };
+                border.Style = (Style)Application.Current.Resources["ShadowBorder"];
+
 
                 DistributionBar.Children.Add(border);
                 Grid.SetColumn(border, colIndex++);
@@ -285,6 +293,5 @@ namespace TimeTracker.Views
             var transform = (ScaleTransform)element.RenderTransform;
             transform.BeginAnimation(ScaleTransform.ScaleXProperty, animation);
         }
-
     }
 }
